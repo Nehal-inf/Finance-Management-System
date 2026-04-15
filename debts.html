@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Debts</title>
+
+<style>
+body { background:#0b0f0c; color:white; font-family:Arial; padding:20px; }
+.container { max-width:900px; margin:auto; }
+
+.card {
+  background:#121814;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+
+input, select {
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:8px;
+  border:none;
+}
+
+button {
+  background:gold;
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.green { color:lightgreen; }
+.red { color:red; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>💸 Debts</h2>
+
+<div class="card">
+  <input id="name" placeholder="Person Name">
+  <input id="amount" type="number" placeholder="Amount">
+
+  <!-- ✅ FIXED VALUES -->
+  <select id="type">
+    <option value="owe">You Owe</option>
+    <option value="owed">They Owe You</option>
+  </select>
+
+  <input id="date" type="date">
+  <input id="note" placeholder="Note">
+
+  <button onclick="addDebt()">Add</button>
+</div>
+
+<div class="card">
+  <h3 class="green">💰 Credit (They owe you)</h3>
+  <div id="creditList"></div>
+</div>
+
+<div class="card">
+  <h3 class="red">💸 Debit (You owe)</h3>
+  <div id="debitList"></div>
+</div>
+
+</div>
+
+<script>
+// ================= INIT =================
+let userId = localStorage.getItem("userId");
+
+if (!userId) {
+  alert("❌ Please login first");
+}
+
+// default date
+document.getElementById('date').value =
+  new Date().toISOString().split('T')[0];
+
+// ================= ADD =================
+async function addDebt() {
+  console.log("Add clicked");
+
+  const name = document.getElementById('name').value;
+  const amount = document.getElementById('amount').value;
+  const type = document.getElementById('type').value;
+  const date = document.getElementById('date').value;
+  const note = document.getElementById('note').value;
+
+  if (!name || !amount) {
+    alert("Fill all fields ❌");
+    return;
+  }
+
+  try {
+    const res = await fetch('/add-debt', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        user_id:userId,
+        person_name:name,
+        amount,
+        type,              // ✅ now correct (owe / owed)
+        due_date:date,
+        note
+      })
+    });
+
+    console.log("Added:", await res.json());
+
+    loadDebts();
+
+  } catch (err) {
+    console.error(err);
+    alert("Backend error ❌");
+  }
+}
+
+// ================= LOAD =================
+async function loadDebts() {
+  const creditDiv = document.getElementById('creditList');
+  const debitDiv = document.getElementById('debitList');
+
+  if (!creditDiv || !debitDiv) return;
+
+  try {
+    const res = await fetch(`/debts/${userId}`);
+    const data = await res.json();
+
+    let credit = "", debit = "";
+
+    data.forEach(d => {
+      const date = new Date(d.due_date).toISOString().split('T')[0];
+
+      // ✅ FIXED LOGIC
+      if (d.type === "owed") {
+        credit += `
+          <div class="card">
+            <b>${d.person_name}</b><br>
+            <span class="green">+ ₹${d.amount}</span><br>
+            ${date}
+            <button onclick="deleteDebt(${d.id})">Delete</button>
+          </div>
+        `;
+      } else {
+        debit += `
+          <div class="card">
+            <b>${d.person_name}</b><br>
+            <span class="red">- ₹${d.amount}</span><br>
+            ${date}
+            <button onclick="deleteDebt(${d.id})">Delete</button>
+          </div>
+        `;
+      }
+    });
+
+    creditDiv.innerHTML = credit;
+    debitDiv.innerHTML = debit;
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ================= DELETE =================
+async function deleteDebt(id) {
+  await fetch(`/delete-debt/${id}`, {method:'DELETE'});
+  loadDebts();
+}
+
+// ================= INIT =================
+loadDebts();
+</script>
+
+</body>
+</html>
