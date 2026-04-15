@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Folio — Personal Finance Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+
+
+<body>
+
+<header>
+  <a class="logo" href="#">
+    <div class="logo-mark"></div>
+    <span class="logo-name">Fo<span>lio</span></span>
+  </a>
+  <nav id="mainNav" style="display: none;">
+    <button class="nav-btn" id="nav-transactions" data-section="transactions">Transactions</button>
+    <button class="nav-btn" data-section="investments">Investments</button>
+    <button class="nav-btn" data-section="history">History</button>
+    
+  
+<button class="nav-btn" data-section="debts">Debts</button>
+<button class="nav-btn" data-section="subscriptions">Subscriptions</button>
+<button id="logoutBtn" style="background: none; border: none; font-size: 0.82rem; font-family: 'DM Sans', sans-serif; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--red); padding: 6px 14px; cursor: pointer;">Logout</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ── Section 1: Add Transaction ─── -->
+  <section id="transactions" class="section">
+    <div class="section-header">
+      <div class="section-pill"><span class="pill-dot"></span>Record</div>
+      <h2>Add a <em>Transaction</em></h2>
+      <div class="divider"></div>
+      <p>Log your income or expenses with category tagging.</p>
+    </div>
+
+    <div class="card">
+      <form id="transactionForm" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="t-type">Transaction Type</label>
+            <select id="t-type" name="type" required>
+              <option value="" disabled selected>Select type</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="t-category">Category</label>
+            <select id="t-category" name="category" required>
+              <option value="" disabled selected>Select category</option>
+              <optgroup label="Income">
+                <option value="salary">Salary</option>
+                <option value="freelance">Freelance</option>
+                <option value="dividends">Dividends</option>
+                <option value="other_income">Other Income</option>
+              </optgroup>
+              <optgroup label="Expense">
+                <option value="food">Food & Dining</option>
+                <option value="transport">Transport</option>
+                <option value="utilities">Utilities</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="shopping">Shopping</option>
+                <option value="rent">Rent / Housing</option>
+                <option value="other_expense">Other Expense</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="t-amount">Amount</label>
+            <div class="input-wrap">
+              <span class="prefix">₹</span>
+              <input type="number" id="t-amount" name="amount" placeholder="0.00" step="0.01" min="0.01" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="t-date">Date</label>
+            <input type="date" id="t-date" name="date" required />
+          </div>
+
+          <div class="field full">
+            <label for="t-note">Note <span style="color:var(--text-muted);font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input type="text" id="t-note" name="note" placeholder="Brief description…" />
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <span class="form-note">Saved to your local ledger & synced.</span>
+          <button type="submit" class="btn-submit" id="txnSubmitBtn">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 8h12M9 4l5 4-5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Save Transaction
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+<!-- ── Section 2: Add Investment ─── -->
+<section id="investments" class="section">
+  <div class="section-header">
+    <div class="section-pill"><span class="pill-dot"></span>Portfolio</div>
+    <h2>Log an <em>Investment</em></h2>
+    <div class="divider"></div>
+    <p>Track your stock purchases and portfolio entries.</p>
+  </div>
+
+  <div class="card">
+    <form id="investmentForm" novalidate>
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="i-stock">Stock / Symbol</label>
+          <input type="text" id="i-stock" name="stock_name" required />
+        </div>
+
+        <div class="field">
+          <label for="i-exchange">Exchange</label>
+<select id="i-exchange" name="exchange">
+  <option value="NSE">National Stock Exchange (NSE)</option>
+  <option value="BSE">Bombay Stock Exchange (BSE)</option>
+  <option value="MSE">Metropolitan Stock Exchange (MSE)</option>
+  <option value="INDIA INX">India International Exchange (India INX)</option>
+  <option value="NSE IX">NSE International Exchange (NSE IX)</option>
+  <option value="CSE">Calcutta Stock Exchange (CSE)</option>
+</select>
+        </div>
+
+        <div class="field">
+          <label for="i-price">Buy Price</label>
+          <input type="number" id="i-price" name="buy_price" required />
+        </div>
+
+        <div class="field">
+          <label for="i-qty">Quantity</label>
+          <input type="number" id="i-qty" name="quantity" required />
+        </div>
+
+        <div class="field">
+          <label for="i-date">Date</label>
+          <input type="date" id="i-date" name="date" required />
+        </div>
+
+        <div class="field">
+          <label>Total Cost</label>
+          <input type="text" id="i-total" readonly />
+        </div>
+
+      </div>
+
+      <br>
+
+      <!-- BUTTONS -->
+      <button type="submit" class="btn secondary-btn" id="invSubmitBtn">
+        ADD TO PORTFOLIO
+      </button>
+
+    
+<button id="viewPortfolioBtn" class="btn secondary-btn">VIEW PORTFOLIO</button>
+
+    <div id="portfolioContainer"></div>
+
+    </form>
+
+    <!-- PORTFOLIO TABLE -->
+    <div id="portfolioContainer" style="margin-top:20px;"></div>
+
+  </div>
+</section>
+
+  <!-- ── Section 3: History ─── -->
+  <section id="history" class="section">
+    <div class="section-header">
+      <div class="section-pill"><span class="pill-dot"></span>Ledger</div>
+      <h2>Transaction <em>History</em></h2>
+      <div class="divider"></div>
+      <p>A full log of all recorded transactions.</p>
+    </div>
+
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card">
+        <div class="stat-label">Total Income</div>
+        <div class="stat-value green" id="statIncome">₹0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Expenses</div>
+        <div class="stat-value red" id="statExpense">₹0.00</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Net Balance</div>
+        <div class="stat-value gold" id="statNet">₹0.00</div>
+      </div>
+    </div>
+    <div id="chart" style="height:300px;"></div>
+<div id="monthlyReport"></div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <div class="table-toolbar" style="padding: 1.25rem 1.5rem 1rem;">
+        <h3>All Transactions</h3>
+        <button class="btn-refresh" id="refreshBtn">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.5 2.5A6.5 6.5 0 1 1 8 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M13.5 2.5V5.5H10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+
+      <div id="tableContainer">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          Loading transactions…
+        </div>
+      </div>
+    </div>
+  </section>
+<section id="debts" class="section">
+  <h2>💸 Debts</h2>
+
+  <div class="card">
+    <input id="name" placeholder="Person Name">
+    <input id="amount" type="number" placeholder="Amount">
+
+    <select id="type">
+      <option value="owe">You Owe</option>
+      <option value="owed">They Owe You</option>
+    </select>
+
+    <input id="date" type="date">
+    <input id="note" placeholder="Note">
+
+    <button onclick="addDebt()">Add</button>
+  </div>
+
+  <div class="card">
+    <h3 style="color:lightgreen;">💰 Credit</h3>
+    <div id="creditList"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="color:red;">💸 Debit</h3>
+    <div id="debitList"></div>
+  </div>
+</section>
+<section id="subscriptions" class="section">
+  <h2>💳 Subscriptions</h2>
+
+  <div class="card">
+    <input id="s-name" placeholder="Service">
+    <input id="s-amount" type="number" placeholder="Amount">
+
+    <select id="s-cycle">
+      <option value="Monthly">Monthly</option>
+      <option value="Yearly">Yearly</option>
+    </select>
+
+    <input id="s-date" type="date">
+
+    <button onclick="addSub()">Add</button>
+  </div>
+
+  <div class="card">
+    <h3>📅 Monthly</h3>
+    <div id="monthlySubs"></div>
+  </div>
+
+  <div class="card">
+    <h3>📆 Yearly</h3>
+    <div id="yearlySubs"></div>
+  </div>
+</section>
+  <!-- ── Section 4: Login ─── -->
+  <section id="login" class="section active">
+    <div class="section-header" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+      <div class="section-pill"><span class="pill-dot"></span>Account</div>
+      <h2>Secure <em>Login</em></h2>
+      <div class="divider"></div>
+      <p>Access your personal finance portfolio securely.</p>
+    </div>
+
+    <div class="card" style="max-width: 480px; margin: 0 auto; box-shadow: 0 8px 32px rgba(201,168,76,0.1);">
+      <form id="loginForm" novalidate>
+        <div class="field" style="margin-bottom: 1.25rem;">
+          <label for="l-email">Email Address</label>
+          <input type="email" id="l-email" name="email" placeholder="you@example.com" required style="width: 100%;" />
+        </div>
+
+        <div class="field" style="margin-bottom: 2rem;">
+          <label for="l-password">Password</label>
+          <input type="password" id="l-password" name="password" placeholder="••••••••" required style="width: 100%;" />
+        </div>
+
+        <button type="submit" class="btn-submit" style="width: 100%; justify-content: center;">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 8h12M9 4l5 4-5 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Access Portfolio
+        </button>
+
+<div style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem;">
+  New to Folio?
+  <span id="registerBtn" style="color: gold; cursor: pointer; font-weight: 600;">
+    Create a user account
+  </span>
+</div>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<!-- Toast -->
+<div id="toast">
+  <span class="toast-dot"></span>
+  <span id="toastMsg"></span>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
