@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Subscriptions</title>
+
+<style>
+body { background:#0b0f0c; color:white; font-family:Arial; padding:20px; }
+.container { max-width:900px; margin:auto; }
+
+.card {
+  background:#121814;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+
+input, select {
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:8px;
+  border:none;
+}
+
+button {
+  background:gold;
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>💳 Subscriptions</h2>
+
+<div class="card">
+  <input id="s-name" placeholder="Service (Netflix)">
+  <input id="s-amount" type="number" placeholder="Amount">
+
+  <!-- ✅ CLEAN VALUES -->
+  <select id="s-cycle">
+    <option value="Monthly">Monthly</option>
+    <option value="Yearly">Yearly</option>
+  </select>
+
+  <input id="s-date" type="date">
+
+  <button onclick="addSub()">Add</button>
+</div>
+
+<div class="card">
+  <h3>📅 Monthly Subscriptions</h3>
+  <div id="monthlySubs"></div>
+</div>
+
+<div class="card">
+  <h3>📆 Yearly Subscriptions</h3>
+  <div id="yearlySubs"></div>
+</div>
+
+</div>
+
+<script>
+// ================= INIT =================
+let userId = localStorage.getItem("userId");
+
+if (!userId) {
+  alert("❌ Please login first");
+}
+
+// default date
+document.getElementById('s-date').value =
+  new Date().toISOString().split('T')[0];
+
+// ================= ADD =================
+async function addSub() {
+  console.log("Add Subscription clicked");
+
+  const name = document.getElementById('s-name').value;
+  const amount = document.getElementById('s-amount').value;
+  const cycle = document.getElementById('s-cycle').value;
+  const date = document.getElementById('s-date').value;
+
+  if (!name || !amount) {
+    alert("Fill all fields ❌");
+    return;
+  }
+
+  try {
+    const res = await fetch('/add-subscription', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        user_id:userId,
+        name,
+        amount,
+        billing_cycle:cycle,   // Monthly / Yearly
+        next_payment:date
+      })
+    });
+
+    console.log("Added:", await res.json());
+
+    loadSubs();
+
+  } catch (err) {
+    console.error(err);
+    alert("Backend error ❌");
+  }
+}
+
+// ================= LOAD =================
+async function loadSubs() {
+  const monthlyDiv = document.getElementById('monthlySubs');
+  const yearlyDiv = document.getElementById('yearlySubs');
+
+  if (!monthlyDiv || !yearlyDiv) return;
+
+  try {
+    const res = await fetch(`/subscriptions/${userId}`);
+    const data = await res.json();
+
+    let monthly = "", yearly = "";
+
+    data.forEach(s => {
+      const date = new Date(s.next_payment).toISOString().split('T')[0];
+
+      const card = `
+        <div class="card">
+          <b>${s.name}</b><br>
+          ₹${s.amount}<br>
+          ${date}
+          <button onclick="deleteSub(${s.id})">Delete</button>
+        </div>
+      `;
+
+      if (s.billing_cycle === "Monthly") {
+        monthly += card;
+      } else {
+        yearly += card;
+      }
+    });
+
+    monthlyDiv.innerHTML = monthly;
+    yearlyDiv.innerHTML = yearly;
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ================= DELETE =================
+async function deleteSub(id) {
+  await fetch(`/delete-subscription/${id}`, {method:'DELETE'});
+  loadSubs();
+}
+
+// ================= INIT =================
+loadSubs();
+</script>
+
+</body>
+</html>
